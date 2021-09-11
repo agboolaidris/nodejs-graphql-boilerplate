@@ -1,5 +1,11 @@
+import { User } from "./../entities/User";
 import { Request, Response } from "express";
 import { Field, InputType, ObjectType } from "type-graphql";
+
+export interface ContextType {
+  res: Response;
+  req: Request;
+}
 
 @InputType()
 export class RegisterInput {
@@ -14,6 +20,15 @@ export class RegisterInput {
 
   @Field()
   role: "admin" | "user";
+
+  @Field()
+  password: string;
+}
+
+@InputType()
+export class LoginInput {
+  @Field()
+  email: string;
 
   @Field()
   password: string;
@@ -50,4 +65,19 @@ export class AuthResponse {
 
   @Field(() => MsgType, { nullable: true })
   msg?: MsgType;
+}
+
+@ObjectType()
+class MeError {
+  @Field()
+  msg: string;
+}
+
+@ObjectType()
+export class MeResponse {
+  @Field(() => MeError, { nullable: true })
+  errors?: MeError;
+
+  @Field(() => User, { nullable: true })
+  data?: User;
 }

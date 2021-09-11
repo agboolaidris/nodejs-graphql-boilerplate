@@ -1,23 +1,21 @@
+import bcrypt from "bcrypt";
 import { User } from "./../entities/User";
-import { RegisterInput, AuthResponse } from "./../typeDef/auth";
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import {
+  RegisterInput,
+  AuthResponse,
+  LoginInput,
+  ContextType,
+  MeResponse,
+} from "./../typeDef/auth";
+import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { validate } from "class-validator";
+import { exists } from "fs";
 
 @Resolver()
 export default class Auth {
   @Query(() => String)
   Hello() {
     return "Hell wolrd";
-  }
-
-  @Query(() => [User], { nullable: true })
-  async getAllUsers(): Promise<User[]> {
-    try {
-      const users = await User.find();
-      return users;
-    } catch (error) {
-      console.log(error);
-    }
   }
 
   @Mutation(() => AuthResponse)
@@ -62,5 +60,76 @@ export default class Auth {
         },
       };
     }
+  }
+
+  @Mutation(() => AuthResponse)
+  async Login(
+    @Arg("data", () => LoginInput) data: LoginInput,
+    @Ctx() { res, req }: ContextType
+  ): Promise<AuthResponse> {
+    try {
+      const { email, password } = data;
+
+      //check if email address exist
+      const user = await User.findOne({ email: email });
+      if (!user)
+        return {
+          errors: {
+            email: "email does not match",
+          },
+        };
+
+      //compare password
+      const confirmPassword = await bcrypt.compare(password, user.password);
+
+      if (!confirmPassword)
+        return {
+          errors: {
+            password: "password is invalid",
+          },
+        };
+
+      req.session.user = {
+        uuid: user.uuid,
+        role: user.role,
+      };
+      return {
+        msg: {
+          msg: "user login successful",
+        },
+      };
+    } catch (error) {
+      return {
+        errors: {
+          email: "error occur",
+        },
+      };
+    }
+  }
+
+  @Query(() => MeResponse)
+  async Me(@Ctx() { req }: ContextType): Promise<MeResponse> {
+    try {
+      if (!req.session.user) {
+        return {
+          errors: {
+            msg: "unauthorized, kindly login",
+          },
+        };
+      }
+
+      const user = await User.findOne({ uuid: req.session.user.uuid });
+      if (!user) {
+        return {
+          errors: {
+            msg: "unauthorized, kindly login",
+          },
+        };
+      }
+
+      return {
+        data: user,
+      };
+    } catch (error) {}
   }
 }
