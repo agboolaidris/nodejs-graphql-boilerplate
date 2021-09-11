@@ -3,7 +3,7 @@ import { createConnection } from "typeorm";
 import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import { buildSchema } from "type-graphql";
-import express from "express";
+import express, { Request, Response } from "express";
 import http from "http";
 
 //resolver
@@ -13,14 +13,21 @@ async function Main() {
   const app = express();
   const httpServer = http.createServer(app);
   try {
+    await createConnection();
     const server = new ApolloServer({
       schema: await buildSchema({
         resolvers: [AuthResolver],
         validate: false,
       }),
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+      context: (req: Request, res: Response) => {
+        return {
+          req,
+          res,
+        };
+      },
     });
-    await createConnection();
+
     await server.start();
     server.applyMiddleware({ app });
     httpServer.listen({ port: 4000 }, () => {
