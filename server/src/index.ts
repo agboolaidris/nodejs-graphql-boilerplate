@@ -41,6 +41,7 @@ async function Main() {
       origin: "*",
     })
   );
+
   const httpServer = http.createServer(app);
 
   try {
