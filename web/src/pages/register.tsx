@@ -4,10 +4,11 @@ import { useCreateUserMutation } from "../generated/graphql";
 import { useRouter } from "next/router";
 
 //components
-import { RegisterWrapper } from "../styles/register";
+import { RegisterWrapper } from "../styles/auth";
 import InputText from "../components/shared/inputText";
 import Button from "../components/shared/button";
 import SelectInput from "../components/shared/selectInput";
+import { toast } from "react-toastify";
 
 function Register() {
   const [{}, register] = useCreateUserMutation();
@@ -32,7 +33,8 @@ function Register() {
             if (response?.errors) {
               setErrors(response?.errors);
             } else if (response?.msg) {
-              router.push("/");
+              toast.success("Account Created");
+              router.push("/login");
             }
           }}
         >

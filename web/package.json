@@ -9,6 +9,7 @@
     "gen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "@urql/exchange-graphcache": "^4.3.3",
     "formik": "^2.2.9",
     "graphql": "^15.5.3",
     "next": "11.0.0",
@@ -16,6 +17,7 @@
     "react-dom": "17.0.2",
     "react-icons": "^4.2.0",
     "react-loading": "^2.0.3",
+    "react-toastify": "^8.0.2",
     "styled-components": "^5.3.0",
     "urql": "^2.0.4"
   },

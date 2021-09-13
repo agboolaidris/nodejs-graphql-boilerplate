@@ -73,6 +73,20 @@ export default class Auth {
   ): Promise<AuthResponse> {
     try {
       const { email, password } = data;
+      const errors: any = {};
+      if (email.trim() == "") {
+        errors.email = "email is required";
+      }
+
+      if (password.trim() == "") {
+        errors.password = "password is required";
+      }
+
+      if (Object.keys(errors).length > 0) {
+        return {
+          errors,
+        };
+      }
 
       //check if email address exist
       const user = await User.findOne({ email: email });
