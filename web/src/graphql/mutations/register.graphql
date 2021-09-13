@@ -1,0 +1,28 @@
+mutation createUser(
+  $name: String!
+  $email: String!
+  $telephone: String!
+  $role: String!
+  $password: String!
+) {
+  Register(
+    data: {
+      name: $name
+      email: $email
+      telephone: $telephone
+      role: $role
+      password: $password
+    }
+  ) {
+    msg {
+      msg
+    }
+    errors {
+      email
+      telephone
+      role
+      password
+      name
+    }
+  }
+}

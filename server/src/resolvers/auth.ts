@@ -26,6 +26,10 @@ export default class Auth {
       const user = new User(data);
 
       const errors: any = {};
+      if (data.password.trim() == "" || data.password.length < 7) {
+        errors.password =
+          "password is required and most be greater than 7 characters";
+      }
       const validation = await validate(user);
       if (validation.length > 0) {
         validation.forEach((error) => {

@@ -38,7 +38,7 @@ async function Main() {
   app.use(
     cors({
       credentials: true,
-      origin: "*",
+      origin: ["http://localhost:3000"],
     })
   );
 
@@ -61,7 +61,7 @@ async function Main() {
     });
 
     await server.start();
-    server.applyMiddleware({ app });
+    server.applyMiddleware({ app, cors: false });
     httpServer.listen({ port: 4000 }, () => {
       console.log(
         `🚀 Server ready at http://localhost:4000${server.graphqlPath}`
