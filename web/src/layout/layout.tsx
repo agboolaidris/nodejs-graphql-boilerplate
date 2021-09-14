@@ -16,7 +16,7 @@ const Wrapper = styled.div`
     position: relative;
     .main {
       padding: 15px;
-      width: 100%;
+      max-width: 100%;
       overflow-y: auto;
     }
   }
