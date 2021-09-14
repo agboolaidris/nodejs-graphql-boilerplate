@@ -1,34 +1,43 @@
 import React, { useState, ReactNode } from "react";
-import Header from "../components/header/header";
-import Sidebar from "../components/sidebar/sidebar";
-import { Col, Row, Wrapper } from "../styles/style";
+import styled from "styled-components";
+import Drawer from "../components/dashboardLayout/drawer";
+import Toolbar from "../components/dashboardLayout/toolbar";
+
+const Wrapper = styled.div`
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .row {
+    display: flex;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+    position: relative;
+    .main {
+      padding: 15px;
+      width: 100%;
+      overflow-y: auto;
+    }
+  }
+`;
 
 interface Props {
   children: ReactNode;
 }
 
 function Layout({ children }: Props) {
-  const [openSidebar, setopenSidebar] = useState(true);
+  const [open, setopen] = useState(false);
 
-  const handleOpenSidebar = () => {
-    setopenSidebar(true);
-  };
-  const handleCloseSidebar = () => {
-    setopenSidebar(false);
-  };
   return (
-    <Wrapper height="100vh">
-      <Header openSidebar={openSidebar} openSidebarFunc={handleOpenSidebar} />
-      <Row>
-        <Col>
-          <Sidebar
-            openSidebar={openSidebar}
-            open={handleOpenSidebar}
-            close={handleCloseSidebar}
-          />
-        </Col>
-        <Col width="full">{children}</Col>
-      </Row>
+    <Wrapper>
+      <Toolbar handleClick={() => setopen(!open)} />
+      <div className="row">
+        <div>
+          <Drawer open={open} />
+        </div>
+        <div className="main">{children}</div>
+      </div>
     </Wrapper>
   );
 }
