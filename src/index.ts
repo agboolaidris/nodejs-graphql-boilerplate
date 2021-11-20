@@ -1,21 +1,72 @@
 import "reflect-metadata";
+import { UserResolver } from "./resolver/user";
+import { ApolloServer } from "apollo-server-express";
+import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import express from "express";
 import { createConnection } from "typeorm";
-import { User } from "./entity/User";
+import { buildSchema } from "type-graphql";
+import http from "http";
+import dotenv from "dotenv-safe";
+import redis from "redis";
+import session from "express-session";
+import connectRedis from "connect-redis";
+import cors from "cors";
 
-createConnection()
-  .then(async (connection) => {
-    console.log("Inserting a new user into the database...");
-    const user = new User();
-    user.firstName = "Timber";
-    user.lastName = "Saw";
-    user.age = 25;
-    await connection.manager.save(user);
-    console.log("Saved a new user with id: " + user.id);
+dotenv.config();
+let RedisStore = connectRedis(session);
+let redisClient = redis.createClient();
 
-    console.log("Loading users from the database...");
-    const users = await connection.manager.find(User);
-    console.log("Loaded users: ", users);
+async function main() {
+  const app = express();
+  const port = process.env.PORT || 5000;
+  try {
+    await createConnection();
+    app.use(
+      cors({
+        origin: ["http://localhost:5000"],
+        credentials: true,
+      })
+    );
 
-    console.log("Here you can setup and run express/koa/any other framework.");
-  })
-  .catch((error) => console.log(error));
+    app.use(
+      session({
+        name: "auth-cookie",
+        store: new RedisStore({
+          client: redisClient,
+          disableTTL: true,
+          disableTouch: true,
+        }),
+        saveUninitialized: false,
+        secret: process.env.SECRET_TOKEN ? process.env.SECRET_TOKEN : "",
+        cookie: {
+          maxAge: 1000 * 60 * 60 * 60 * 24 * 365,
+          secure: process.env.NODE_ENV !== "development",
+          httpOnly: true,
+          sameSite: "lax",
+        },
+        resave: false,
+      })
+    );
+
+    const httpServer = http.createServer(app);
+    const server = new ApolloServer({
+      schema: await buildSchema({
+        resolvers: [UserResolver],
+        validate: false,
+      }),
+      plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+      context: ({ req, res }) => ({ req, res }),
+    });
+
+    await server.start();
+    server.applyMiddleware({ app, cors: false });
+    await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
+    console.log(
+      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+    );
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+main();
