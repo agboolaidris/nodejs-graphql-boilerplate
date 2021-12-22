@@ -57,6 +57,7 @@ export class RegisterResponse {
   msg?: MsgType;
 }
 
+
 @ObjectType()
 class LoginError {
   @Field(() => String, { nullable: true })

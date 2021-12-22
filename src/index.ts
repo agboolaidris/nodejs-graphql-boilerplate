@@ -11,6 +11,7 @@ import redis from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
+import { PostResolver } from "./resolver/post";
 
 dotenv.config();
 let RedisStore = connectRedis(session);
@@ -51,7 +52,7 @@ async function main() {
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
       schema: await buildSchema({
-        resolvers: [UserResolver],
+        resolvers: [UserResolver, PostResolver],
         validate: false,
       }),
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
