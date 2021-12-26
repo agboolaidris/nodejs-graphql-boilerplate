@@ -11,8 +11,9 @@ export class UserResolver {
   @Query(() => User, { nullable: true })
   async isme(@Ctx() { req }: ContextType) {
     try {
+      console.log(req.session.userInfo);
       if (!req.session.userInfo) return null;
-      console.log(req.session);
+
       return User.findOne(req.session.userInfo.id);
     } catch (error) {
       return null;
@@ -106,6 +107,8 @@ export class UserResolver {
         id: user.id,
         role: user.role,
       };
+
+      console.log(req.session);
 
       return {
         msg: {
