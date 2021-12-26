@@ -13,7 +13,9 @@ export class PostResolver {
       };
     } catch (error) {
       return {
-        ok: false,
+        error: {
+          server: error.message,
+        },
       };
     }
   }
