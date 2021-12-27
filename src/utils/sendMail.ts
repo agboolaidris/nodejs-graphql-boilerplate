@@ -1,10 +1,12 @@
 import AWS from "aws-sdk";
+import dotenv from "dotenv-safe";
 import { SendEmailRequest } from "aws-sdk/clients/ses";
+dotenv.config();
 
 const SES_CONFIG = {
   accessKeyId: process.env.AWS_SES_ACCESS_KEY,
   secretAccessKey: process.env.AWS_SES_SECRET_KEY,
-  region: "us-west-2",
+  region: "me-south-1",
 };
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
