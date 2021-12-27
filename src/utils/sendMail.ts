@@ -2,9 +2,9 @@ import AWS from "aws-sdk";
 import { SendEmailRequest } from "aws-sdk/clients/ses";
 
 const SES_CONFIG = {
-  accessKeyId: "AKIATB7WQZVGCD6TNOI6",
-  secretAccessKey: "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",
-  region: "me-south-1",
+  accessKeyId: process.env.AWS_SES_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SES_SECRET_KEY,
+  region: "us-west-2",
 };
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
