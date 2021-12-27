@@ -5,6 +5,7 @@ import { LoginInput, RegisterInput } from "src/types/user";
 import bcrypt from "bcrypt";
 import { validate } from "class-validator";
 import { LoginResponse, RegisterResponse } from "./../types/user";
+import { sendEmail } from "src/utils/sendMail";
 
 @Resolver()
 export class UserResolver {
@@ -52,6 +53,7 @@ export class UserResolver {
       }
 
       await user.save();
+
       return { msg: { msg: "user register" } };
     } catch (error) {
       if (error.code === "23505") {
@@ -102,6 +104,18 @@ export class UserResolver {
             password: "password doesn't match",
           },
         };
+
+      const response = await sendEmail(
+        "iristech247@gmail.com",
+        "Idris Agboola"
+      );
+      if (!response)
+        return {
+          errors: {
+            server: "email not send",
+          },
+        };
+
       req.session.userInfo = {
         id: user.id,
         role: user.role,
