@@ -200,6 +200,7 @@ export class UserResolver {
         };
       user.password = await bcrypt.hash(password, 10);
       await user.save();
+      await Redis.del(`forgetpassword-${token}`);
 
       return {
         msg: {
