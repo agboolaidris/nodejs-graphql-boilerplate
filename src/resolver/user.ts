@@ -106,17 +106,6 @@ export class UserResolver {
           },
         };
 
-      const response = await sendEmail(
-        "iristech247@gmail.com",
-        "Idris Agboola"
-      );
-      if (!response)
-        return {
-          errors: {
-            server: "email not send",
-          },
-        };
-
       req.session.userInfo = {
         id: user.id,
         role: user.role,
@@ -158,8 +147,17 @@ export class UserResolver {
       const message = `
       <a href="${process.env.CLIENT_URL}/forget-password/${token}">Click to change your password</a>
       `;
-      Redis.set("djjd", token);
-      const send = await sendEmail("", message);
+      await Redis.set(
+        `forgetpassword-${token}`,
+        user.id,
+        "ex",
+        1000 * 60 * 60 * 24
+      ); //expire in 1day
+      const send = await sendEmail(
+        "iristech247@gmail.com",
+        message,
+        "Reset password"
+      );
       if (!send) return false;
       return true;
     } catch (error) {

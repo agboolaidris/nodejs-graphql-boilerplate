@@ -7,7 +7,7 @@ import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
 import http from "http";
 import dotenv from "dotenv-safe";
-import redis from "ioredis";
+import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
@@ -15,7 +15,7 @@ import { PostResolver } from "./resolver/post";
 
 dotenv.config();
 let RedisStore = connectRedis(session);
-let redisClient = redis();
+let redisClient = new Redis();
 
 async function main() {
   const app = express();
