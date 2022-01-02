@@ -7,7 +7,7 @@ import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
 import http from "http";
 import dotenv from "dotenv-safe";
-import redis from "redis";
+import redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
@@ -15,7 +15,7 @@ import { PostResolver } from "./resolver/post";
 
 dotenv.config();
 let RedisStore = connectRedis(session);
-let redisClient = redis.createClient();
+let redisClient = redis();
 
 async function main() {
   const app = express();
@@ -56,7 +56,7 @@ async function main() {
         validate: false,
       }),
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-      context: ({ req, res }) => ({ req, res }),
+      context: ({ req, res }) => ({ req, res, Redis: redisClient }),
     });
 
     await server.start();

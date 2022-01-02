@@ -1,4 +1,5 @@
-import { ContextType } from "../types/@types";
+import { ContextType } from "./../types/@types";
+import { v4 as uuidv4 } from "uuid";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { User } from "src/entities/User";
 import { LoginInput, RegisterInput } from "src/types/user";
@@ -142,5 +143,27 @@ export class UserResolver {
 
     res.clearCookie("auth-cookie");
     return true;
+  }
+
+  @Mutation(() => Boolean)
+  async forgetpassword(
+    @Arg("email") email: string,
+    @Ctx() { Redis }: ContextType
+  ): Promise<boolean> {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) return false;
+      const token = uuidv4();
+
+      const message = `
+      <a href="${process.env.CLIENT_URL}/forget-password/${token}">Click to change your password</a>
+      `;
+      Redis.set("djjd", token);
+      const send = await sendEmail("", message);
+      if (!send) return false;
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
