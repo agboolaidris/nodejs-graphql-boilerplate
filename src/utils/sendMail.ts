@@ -11,7 +11,11 @@ const SES_CONFIG = {
 
 const AWS_SES = new AWS.SES(SES_CONFIG);
 
-export const sendEmail = (recipientEmail: string, name: string) => {
+export const sendEmail = (
+  recipientEmail: string,
+  msg: string,
+  subject: string
+) => {
   let params: SendEmailRequest = {
     Source: "agboolaisholaidreez@gmail.com",
     Destination: {
@@ -22,12 +26,12 @@ export const sendEmail = (recipientEmail: string, name: string) => {
       Body: {
         Html: {
           Charset: "UTF-8",
-          Data: "This is the body of my email!",
+          Data: msg,
         },
       },
       Subject: {
         Charset: "UTF-8",
-        Data: `Hello, ${name}!`,
+        Data: subject,
       },
     },
   };
