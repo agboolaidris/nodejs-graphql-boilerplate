@@ -2,7 +2,12 @@ import { ContextType } from "./../types/@types";
 import { v4 as uuidv4 } from "uuid";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { User } from "src/entities/User";
-import { LoginInput, RegisterInput } from "src/types/user";
+import {
+  LoginInput,
+  RegisterInput,
+  ResetpasswordInput,
+  ResetpasswordResponse,
+} from "src/types/user";
 import bcrypt from "bcrypt";
 import { validate } from "class-validator";
 import { LoginResponse, RegisterResponse } from "./../types/user";
@@ -162,6 +167,51 @@ export class UserResolver {
       return true;
     } catch (error) {
       return false;
+    }
+  }
+
+  @Mutation(() => ResetpasswordResponse)
+  async resetpassword(
+    @Ctx() { Redis }: ContextType,
+    @Arg("options") { password, token }: ResetpasswordInput
+  ): Promise<ResetpasswordResponse> {
+    try {
+      if (password.length < 2)
+        return {
+          errors: {
+            password: "password most be greater than 2 character",
+          },
+        };
+
+      const id = await Redis.get(`forgetpassword-${token}`);
+      if (!id)
+        return {
+          errors: {
+            password: "token expired",
+          },
+        };
+
+      const user = await User.findOne(id);
+      if (!user)
+        return {
+          errors: {
+            password: "user not longer exist",
+          },
+        };
+      user.password = await bcrypt.hash(password, 10);
+      await user.save();
+
+      return {
+        msg: {
+          msg: "password change",
+        },
+      };
+    } catch (error) {
+      return {
+        errors: {
+          server: error.message,
+        },
+      };
     }
   }
 }

@@ -30,6 +30,15 @@ export class LoginInput {
   password: string;
 }
 
+@InputType()
+export class ResetpasswordInput {
+  @Field()
+  token: string;
+
+  @Field()
+  password: string;
+}
+
 @ObjectType()
 class RegisterError {
   @Field(() => String, { nullable: true })
@@ -57,7 +66,6 @@ export class RegisterResponse {
   msg?: MsgType;
 }
 
-
 @ObjectType()
 class LoginError {
   @Field(() => String, { nullable: true })
@@ -74,6 +82,24 @@ class LoginError {
 export class LoginResponse {
   @Field(() => LoginError, { nullable: true })
   errors?: LoginError;
+
+  @Field(() => MsgType, { nullable: true })
+  msg?: MsgType;
+}
+
+@ObjectType()
+class ResetpasswordError {
+  @Field(() => String, { nullable: true })
+  password?: string;
+
+  @Field(() => String, { nullable: true })
+  server?: string;
+}
+
+@ObjectType()
+export class ResetpasswordResponse {
+  @Field(() => ResetpasswordError, { nullable: true })
+  errors?: ResetpasswordError;
 
   @Field(() => MsgType, { nullable: true })
   msg?: MsgType;
