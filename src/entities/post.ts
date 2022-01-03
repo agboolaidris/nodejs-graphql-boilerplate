@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "type-graphql";
 import { v4 as uuidv4 } from "uuid";
-import bcrypt from "bcrypt";
-import { IsEmail, Length } from "class-validator";
+import { Length } from "class-validator";
+import { User } from "./User";
 
 import {
   Entity,
@@ -11,16 +11,15 @@ import {
   UpdateDateColumn,
   CreateDateColumn,
   BeforeInsert,
-  OneToMany,
+  ManyToOne,
 } from "typeorm";
-import { Post } from "./post";
 
 @ObjectType()
 @Entity()
-export class User extends BaseEntity {
-  constructor(user: Partial<User>) {
+export class Post extends BaseEntity {
+  constructor(post: Partial<Post>) {
     super();
-    Object.assign(this, user);
+    Object.assign(this, post);
   }
 
   @PrimaryGeneratedColumn()
@@ -29,23 +28,21 @@ export class User extends BaseEntity {
   @Field()
   @Column({ unique: true })
   @Length(6)
-  username: string;
+  title: string;
 
   @Field()
-  @Column({ enum: ["user", "admin"] })
-  role: string;
-
-  @Field()
-  @Column({ unique: true })
-  @IsEmail()
-  email: string;
-
   @Column()
-  @Length(6)
-  password: string;
+  @Length(100)
+  content: string;
 
-  @OneToMany(() => Post, (posts) => posts.user)
-  posts: Post[];
+  @Column({ default: 0, type: "int" })
+  vote: number;
+
+  @ManyToOne(() => User, (user) => user.posts)
+  user: User;
+
+  @Column({ nullable: true })
+  imageURL: string;
 
   @Field()
   @UpdateDateColumn()
@@ -62,10 +59,5 @@ export class User extends BaseEntity {
   @BeforeInsert()
   generateUUid() {
     this.uuid = uuidv4();
-  }
-
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
   }
 }

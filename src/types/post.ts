@@ -8,8 +8,8 @@ export class PostInput {
   @Field()
   content: string;
 
-  @Field(() => [String])
-  imageURL: string[];
+  @Field(() => String, { nullable: true })
+  imageURL?: string;
 }
 
 @ObjectType()
