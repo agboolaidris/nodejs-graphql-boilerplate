@@ -34,7 +34,7 @@ export class UserResolver {
       const user = new User({ ...body, role: "admin" });
 
       const errors = await validate(user);
-      if (errors.length > 1) {
+      if (errors.length > 0) {
         const map: any = {};
         errors.forEach((err) => {
           const key = err.property;

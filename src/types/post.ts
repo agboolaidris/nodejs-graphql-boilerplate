@@ -15,7 +15,7 @@ export class PostInput {
 @ObjectType()
 class ErrorType {
   @Field(() => String, { nullable: true })
-  body?: string;
+  content?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
