@@ -32,7 +32,7 @@ async function main() {
     await createConnection();
     app.use(
       cors({
-        origin: ["http://localhost:5000"],
+        origin: [],
         credentials: true,
       })
     );
