@@ -8,14 +8,14 @@ export class PostInput {
   @Field()
   content: string;
 
-  @Field(() => [String])
-  imageURL: string[];
+  @Field(() => String, { nullable: true })
+  imageURL?: string;
 }
 
 @ObjectType()
 class ErrorType {
   @Field(() => String, { nullable: true })
-  body?: string;
+  content?: string;
 
   @Field(() => String, { nullable: true })
   title?: string;
