@@ -1,71 +1,48 @@
-import "reflect-metadata";
-import { ApolloServer } from "apollo-server-express";
+import { ApolloServer, gql } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import express from "express";
-import { createConnection } from "typeorm";
-import { buildSchema } from "type-graphql";
 import http from "http";
-import dotenv from "dotenv";
-import Redis from "ioredis";
-import session from "express-session";
-import connectRedis from "connect-redis";
-import cors from "cors";
-import { PostResolver } from "./resolver/post";
-import { UserResolver } from "./resolver/user";
-import url from "url";
 
-dotenv.config();
-let RedisStore = connectRedis(session);
-let redisClient: any = null;
-if (process.env.REDISTOGO_URL) {
-  var rtg = url.parse(process.env.REDISTOGO_URL, true);
-  const port = rtg.port ? parseFloat(rtg.port) : undefined;
-  const host = rtg.host ? rtg.host : undefined;
-  const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
-  redisClient = new Redis(port, host);
-  redisClient.auth(auth);
-} else {
-  redisClient = new Redis();
-}
+const books = [
+  {
+    title: "The Awakening",
+    author: "Kate Chopin",
+  },
+  {
+    title: "City of Glass",
+    author: "Paul Auster",
+  },
+];
+const typeDefs = gql`
+  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+
+  # This "Book" type defines the queryable fields for every book in our data source.
+  type Book {
+    title: String
+    author: String
+  }
+
+  # The "Query" type is special: it lists all of the available queries that
+  # clients can execute, along with the return type for each. In this
+  # case, the "books" query returns an array of zero or more Books (defined above).
+  type Query {
+    books: [Book]
+  }
+`;
+const resolvers = {
+  Query: {
+    books: () => books,
+  },
+};
+
 async function main() {
   const app = express();
   try {
-    await createConnection();
-    app.use(
-      cors({
-        origin: [],
-        credentials: true,
-      })
-    );
-
-    app.use(
-      session({
-        name: "auth-cookie",
-        store: new RedisStore({
-          client: redisClient,
-          disableTTL: true,
-          disableTouch: true,
-        }),
-        saveUninitialized: false,
-        secret: process.env.SECRET_TOKEN ? process.env.SECRET_TOKEN : "",
-        cookie: {
-          maxAge: 1000 * 60 * 60 * 60 * 24 * 365,
-          secure: process.env.NODE_ENV !== "development",
-          httpOnly: true,
-          sameSite: "lax",
-        },
-        resave: false,
-      })
-    );
-
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
-      schema: await buildSchema({
-        resolvers: [UserResolver, PostResolver],
-        validate: false,
-      }),
+      typeDefs,
+      resolvers,
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-      context: ({ req, res }) => ({ req, res, Redis: redisClient }),
     });
 
     await server.start();
