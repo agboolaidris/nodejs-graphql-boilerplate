@@ -1,7 +1,10 @@
-import { ApolloServer, gql } from "apollo-server-express";
+import "reflect-metadata";
+import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import { buildSchema, Field, ObjectType } from "type-graphql";
 import express from "express";
 import http from "http";
+import { Query, Resolver } from "type-graphql";
 
 const books = [
   {
@@ -13,35 +16,32 @@ const books = [
     author: "Paul Auster",
   },
 ];
-const typeDefs = gql`
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
 
-  # This "Book" type defines the queryable fields for every book in our data source.
-  type Book {
-    title: String
-    author: String
-  }
+@ObjectType()
+class Book {
+  @Field()
+  title: String;
+  @Field()
+  author: String;
+}
 
-  # The "Query" type is special: it lists all of the available queries that
-  # clients can execute, along with the return type for each. In this
-  # case, the "books" query returns an array of zero or more Books (defined above).
-  type Query {
-    books: [Book]
+@Resolver()
+class UserResolver {
+  @Query(() => [Book])
+  books() {
+    return books;
   }
-`;
-const resolvers = {
-  Query: {
-    books: () => books,
-  },
-};
+}
 
 async function main() {
   const app = express();
   try {
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
-      typeDefs,
-      resolvers,
+      schema: await buildSchema({
+        resolvers: [UserResolver],
+        validate: false,
+      }),
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
     });
 
