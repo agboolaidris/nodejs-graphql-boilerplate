@@ -12,10 +12,22 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 import { PostResolver } from "./resolver/post";
+import url from "url";
 
 dotenv.config();
 let RedisStore = connectRedis(session);
 let redisClient = new Redis();
+if (process.env.REDISTOGO_URL) {
+  // TODO: redistogo connection
+  var rtg = url.parse(process.env.REDISTOGO_URL, true);
+
+  const port = rtg.port ? parseFloat(rtg.port) : undefined;
+  const host = rtg.host ? rtg.host : undefined;
+  const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
+
+  redisClient = new Redis(port, host);
+  redisClient.auth(auth);
+}
 
 async function main() {
   const app = express();
