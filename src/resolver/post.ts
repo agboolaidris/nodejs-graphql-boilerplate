@@ -1,6 +1,6 @@
-import { Post } from "src/entities/post";
+import { Post } from "../entities/post";
 import { getRepository } from "typeorm";
-import { PostInput, PostResponse } from "src/types/post";
+import { PostInput, PostResponse } from "../types/post";
 import {
   Arg,
   Mutation,
@@ -9,10 +9,10 @@ import {
   UseMiddleware,
   Query,
 } from "type-graphql";
-import { ContextType } from "src/types/@types";
+import { ContextType } from "../types/@types";
 import { validate } from "class-validator";
-import { AuthMiddeware } from "src/middleware/auth";
-import { User } from "src/entities/User";
+import { AuthMiddeware } from "../middleware/auth";
+import { User } from "../entities/User";
 
 @Resolver()
 export class PostResolver {
@@ -79,7 +79,6 @@ export class PostResolver {
     @Arg("limit", { nullable: true }) limit: number
   ): Promise<Post[] | null> {
     try {
-      console.log(limit);
       const posts = await getRepository(Post)
         .createQueryBuilder("post")
         .orderBy("post.created_at", "DESC")

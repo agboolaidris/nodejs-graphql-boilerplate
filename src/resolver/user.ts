@@ -1,24 +1,24 @@
 import { ContextType } from "./../types/@types";
 import { v4 as uuidv4 } from "uuid";
 import { Arg, Ctx, Mutation, Query, Resolver } from "type-graphql";
-import { User } from "src/entities/User";
+import { User } from "../entities/User";
 import {
   LoginInput,
   RegisterInput,
   ResetpasswordInput,
   ResetpasswordResponse,
-} from "src/types/user";
+} from "../types/user";
 import bcrypt from "bcrypt";
 import { validate } from "class-validator";
 import { LoginResponse, RegisterResponse } from "./../types/user";
-import { sendEmail } from "src/utils/sendMail";
+import { sendEmail } from "../utils/sendMail";
 
 @Resolver()
 export class UserResolver {
   @Query(() => User, { nullable: true })
   async isme(@Ctx() { req }: ContextType) {
     try {
-      if (!req.session.userInfo) return null;
+      if (!req.session?.userInfo) return null;
 
       return User.findOne(req.session.userInfo.id);
     } catch (error) {
@@ -132,11 +132,13 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   async logout(@Ctx() { req, res }: ContextType): Promise<boolean> {
-    const destroy_session = await req.session.destroy();
-    if (!destroy_session) return false;
-
-    res.clearCookie("auth-cookie");
-    return true;
+    const response = req.session.destroy(() => {});
+    if (!response.userInfo) {
+      return false;
+    } else {
+      res.clearCookie("auth-cookie");
+      return true;
+    }
   }
 
   @Mutation(() => Boolean)
