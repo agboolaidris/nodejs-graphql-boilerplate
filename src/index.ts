@@ -5,7 +5,7 @@ import express from "express";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
 import http from "http";
-import dotenv from "dotenv-safe";
+import dotenv from "dotenv";
 import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
@@ -18,13 +18,10 @@ dotenv.config();
 let RedisStore = connectRedis(session);
 let redisClient = new Redis();
 if (process.env.REDISTOGO_URL) {
-  // TODO: redistogo connection
   var rtg = url.parse(process.env.REDISTOGO_URL, true);
-
   const port = rtg.port ? parseFloat(rtg.port) : undefined;
   const host = rtg.host ? rtg.host : undefined;
   const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
-
   redisClient = new Redis(port, host);
   redisClient.auth(auth);
 }

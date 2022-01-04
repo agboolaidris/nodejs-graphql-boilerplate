@@ -1,5 +1,5 @@
 import AWS from "aws-sdk";
-import dotenv from "dotenv-safe";
+import dotenv from "dotenv";
 import { SendEmailRequest } from "aws-sdk/clients/ses";
 dotenv.config();
 
