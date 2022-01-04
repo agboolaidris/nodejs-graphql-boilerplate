@@ -1,4 +1,4 @@
-const rootDir = process.env.NODE_ENV === "development" ? "src" : "dist";
+const rootDir = process.env.NODE_ENV === "production" ? "src" : "dist";
 
 module.exports = {
   name: "default",
