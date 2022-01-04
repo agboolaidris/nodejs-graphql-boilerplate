@@ -38,6 +38,7 @@ export class Post extends BaseEntity {
   @Column({ default: 0, type: "int" })
   vote: number;
 
+  @Field(() => User)
   @ManyToOne(() => User, (user) => user.posts)
   user: User;
 
