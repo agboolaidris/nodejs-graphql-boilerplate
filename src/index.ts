@@ -16,7 +16,7 @@ import url from "url";
 
 dotenv.config();
 let RedisStore = connectRedis(session);
-let redisClient = new Redis();
+let redisClient: any = null;
 if (process.env.REDISTOGO_URL) {
   var rtg = url.parse(process.env.REDISTOGO_URL, true);
   const port = rtg.port ? parseFloat(rtg.port) : undefined;
@@ -24,6 +24,8 @@ if (process.env.REDISTOGO_URL) {
   const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
   redisClient = new Redis(port, host);
   redisClient.auth(auth);
+} else {
+  redisClient = new Redis();
 }
 async function main() {
   const app = express();
