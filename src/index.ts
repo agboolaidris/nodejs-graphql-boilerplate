@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import { UserResolver } from "./resolver/user";
 import { ApolloServer } from "apollo-server-express";
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import express from "express";
@@ -12,6 +11,7 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
 import { PostResolver } from "./resolver/post";
+import { UserResolver } from "./resolver/user";
 import url from "url";
 
 dotenv.config();
