@@ -25,7 +25,7 @@ if (process.env.REDISTOGO_URL) {
   redisClient = new Redis(port, host);
   redisClient.auth(auth);
 }
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 8080;
 async function main() {
   const app = express();
   try {
