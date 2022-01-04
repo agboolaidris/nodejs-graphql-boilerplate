@@ -25,7 +25,6 @@ if (process.env.REDISTOGO_URL) {
   redisClient = new Redis(port, host);
   redisClient.auth(auth);
 }
-const port = process.env.PORT || 8080;
 async function main() {
   const app = express();
   try {
@@ -69,9 +68,11 @@ async function main() {
 
     await server.start();
     server.applyMiddleware({ app, cors: false });
-    await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
+    await new Promise<void>((resolve) =>
+      httpServer.listen({ port: process.env.PORT || 8080 }, resolve)
+    );
     console.log(
-      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+      `🚀 Server ready at http://localhost:8080/${server.graphqlPath}`
     );
   } catch (error) {
     console.log(error);
