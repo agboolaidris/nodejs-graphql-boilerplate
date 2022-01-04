@@ -4,6 +4,7 @@ import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import { buildSchema, Field, ObjectType } from "type-graphql";
 import express from "express";
 import http from "http";
+import cors from "cors";
 import { Query, Resolver } from "type-graphql";
 
 const books = [
@@ -36,6 +37,12 @@ class UserResolver {
 async function main() {
   const app = express();
   try {
+    app.use(
+      cors({
+        origin: "*",
+        credentials: true,
+      })
+    );
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
       schema: await buildSchema({
