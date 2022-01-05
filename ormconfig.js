@@ -10,6 +10,12 @@ module.exports = {
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: true,
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
   entities: [rootDir + "/entities/**/*{.ts,.js}"],
   migrations: [rootDir + "/migrations/**/*{.ts,.js}"],
   subscribers: [rootDir + "/subscribers/**/*{.ts,.js}"],
