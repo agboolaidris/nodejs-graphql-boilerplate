@@ -10,7 +10,7 @@ import Redis from "ioredis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import cors from "cors";
-//import { PostResolver } from "./resolver/post";
+import { PostResolver } from "./resolver/post";
 import { UserResolver } from "./resolver/user";
 //import url from "url";
 
@@ -24,27 +24,17 @@ async function main() {
 
     let RedisStore = connectRedis(session);
 
-    const options = process.env.REDISTOGO_URL
-      ? {
-          sentinels: [{ host: "spinyfin.redistogo.com", port: 9148 }],
-          password: "45d788a90b39fba8815ccaa8a604cdad",
-          sentinelPassword: "45d788a90b39fba8815ccaa8a604cdad",
-          name: "redistogo",
-        }
-      : undefined;
+    const options =
+      process.env.NODE_ENV !== "development"
+        ? {
+            sentinels: [{ host: "spinyfin.redistogo.com", port: 9148 }],
+            password: "45d788a90b39fba8815ccaa8a604cdad",
+            sentinelPassword: "45d788a90b39fba8815ccaa8a604cdad",
+            name: "redistogo",
+          }
+        : undefined;
     const redisClient = new Redis(options);
-    // let redisClient: any = null;
-    // if (process.env.REDISTOGO_URL) {
-    //   var rtg = url.parse(process.env.REDISTOGO_URL, true);
-    //   const port = rtg.port ? parseFloat(rtg.port) : undefined;
-    //   const host = rtg.host ? rtg.host : undefined;
-    //   console.log(port, host);
-    //   const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
 
-    //   redisClient.auth(auth);
-    // } else {
-    //   redisClient = new Redis();
-    // }
     app.use(
       cors({
         origin: [],
@@ -75,12 +65,11 @@ async function main() {
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
       schema: await buildSchema({
-        resolvers: [UserResolver],
+        resolvers: [UserResolver, PostResolver],
         validate: false,
       }),
       plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
-      // Redis: redisClient
-      context: ({ req, res }) => ({ req, res }),
+      context: ({ req, res }) => ({ req, res, Redis: redisClient }),
     });
 
     await server.start();
