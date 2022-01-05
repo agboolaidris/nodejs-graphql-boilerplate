@@ -1,4 +1,4 @@
-const rootDir = process.env.NODE_ENV === "production" ? "src" : "dist";
+const rootDir = process.env.NODE_ENV === "development" ? "src" : "dist";
 
 module.exports = {
   name: "default",
@@ -8,7 +8,7 @@ module.exports = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: false,
+  synchronize: true,
   logging: true,
   entities: [rootDir + "/entities/**/*{.ts,.js}"],
   migrations: [rootDir + "/migrations/**/*{.ts,.js}"],
