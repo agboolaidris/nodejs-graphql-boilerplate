@@ -1,6 +1,9 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import {
+  ApolloServerPluginDrainHttpServer,
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} from "apollo-server-core";
 import express from "express";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
@@ -12,7 +15,6 @@ import connectRedis from "connect-redis";
 import cors from "cors";
 import { PostResolver } from "./resolver/post";
 import { UserResolver } from "./resolver/user";
-//import url from "url";
 
 dotenv.config();
 
@@ -27,17 +29,20 @@ async function main() {
     const options =
       process.env.NODE_ENV !== "development"
         ? {
-            sentinels: [{ host: "spinyfin.redistogo.com", port: 9148 }],
-            password: "45d788a90b39fba8815ccaa8a604cdad",
-            sentinelPassword: "45d788a90b39fba8815ccaa8a604cdad",
-            name: "redistogo",
+            host: process.env.RD_HOST,
+            port: process.env.RD_PORT
+              ? parseFloat(process.env.RD_PORT)
+              : undefined,
+            password: process.env.RD_PASSWORD,
+            name: process.env.RD_NAME,
           }
         : undefined;
+
     const redisClient = new Redis(options);
 
     app.use(
       cors({
-        origin: [],
+        origin: "*",
         credentials: true,
       })
     );
@@ -68,8 +73,12 @@ async function main() {
         resolvers: [UserResolver, PostResolver],
         validate: false,
       }),
-      plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+      plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginLandingPageGraphQLPlayground(),
+      ],
       context: ({ req, res }) => ({ req, res, Redis: redisClient }),
+      introspection: true,
     });
 
     await server.start();
