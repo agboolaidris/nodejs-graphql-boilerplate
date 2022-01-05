@@ -1,6 +1,9 @@
 import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
+import {
+  ApolloServerPluginDrainHttpServer,
+  ApolloServerPluginLandingPageGraphQLPlayground,
+} from "apollo-server-core";
 import express from "express";
 import { createConnection } from "typeorm";
 import { buildSchema } from "type-graphql";
@@ -12,28 +15,34 @@ import connectRedis from "connect-redis";
 import cors from "cors";
 import { PostResolver } from "./resolver/post";
 import { UserResolver } from "./resolver/user";
-import url from "url";
 
 dotenv.config();
-let RedisStore = connectRedis(session);
-let redisClient = new Redis();
-if (process.env.REDISTOGO_URL) {
-  var rtg = url.parse(process.env.REDISTOGO_URL, true);
-  const port = rtg.port ? parseFloat(rtg.port) : undefined;
-  const host = rtg.host ? rtg.host : undefined;
-  const auth = rtg.auth?.split(":")[1] ? rtg.auth.split(":")[1] : "";
-  redisClient = new Redis(port, host);
-  redisClient.auth(auth);
-}
 
 async function main() {
   const app = express();
   const port = process.env.PORT || 5000;
   try {
     await createConnection();
+
+    let RedisStore = connectRedis(session);
+
+    const options =
+      process.env.NODE_ENV !== "development"
+        ? {
+            host: process.env.RD_HOST,
+            port: process.env.RD_PORT
+              ? parseFloat(process.env.RD_PORT)
+              : undefined,
+            password: process.env.RD_PASSWORD,
+            name: process.env.RD_NAME,
+          }
+        : undefined;
+
+    const redisClient = new Redis(options);
+
     app.use(
       cors({
-        origin: ["http://localhost:5000"],
+        origin: "*",
         credentials: true,
       })
     );
@@ -64,15 +73,19 @@ async function main() {
         resolvers: [UserResolver, PostResolver],
         validate: false,
       }),
-      plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+      plugins: [
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+        ApolloServerPluginLandingPageGraphQLPlayground(),
+      ],
       context: ({ req, res }) => ({ req, res, Redis: redisClient }),
+      introspection: true,
     });
 
     await server.start();
     server.applyMiddleware({ app, cors: false });
     await new Promise<void>((resolve) => httpServer.listen({ port }, resolve));
     console.log(
-      `🚀 Server ready at http://localhost:${port}${server.graphqlPath}`
+      `🚀 Server ready at http://localhost:${port}/${server.graphqlPath}`
     );
   } catch (error) {
     console.log(error);

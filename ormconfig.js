@@ -8,8 +8,14 @@ module.exports = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-  synchronize: false,
+  synchronize: true,
   logging: true,
+  ssl: true,
+  extra: {
+    ssl: {
+      rejectUnauthorized: false,
+    },
+  },
   entities: [rootDir + "/entities/**/*{.ts,.js}"],
   migrations: [rootDir + "/migrations/**/*{.ts,.js}"],
   subscribers: [rootDir + "/subscribers/**/*{.ts,.js}"],
